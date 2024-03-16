@@ -9,5 +9,6 @@ version = "0.1.0"
 async-graphql = "7.0"
 async-graphql-axum = "7.0"
 axum = "0.7"
+dotenv = "0.15"
 sqlx = {version = "0.7", features = ["runtime-tokio", "tls-native-tls", "postgres"]}
 tokio = {version = "1", features = ["macros", "rt-multi-thread"]}
