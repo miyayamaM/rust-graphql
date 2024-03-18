@@ -23,7 +23,7 @@ async fn graphql_playground() -> impl IntoResponse {
 #[tokio::main]
 async fn main() {
     let pool = establish_db_connection().await;
-    let schema = Schema::build(QueryRoot, EmptyMutation, EmptySubscription)
+    let schema = Schema::build(QueryRoot::default(), EmptyMutation, EmptySubscription)
         .data(pool)
         .finish();
 
