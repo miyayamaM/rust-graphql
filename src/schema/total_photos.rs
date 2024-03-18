@@ -1,7 +1,7 @@
 use async_graphql::{Context, Object};
 use sqlx::{Pool, Postgres};
 
-pub struct QueryRoot;
+use crate::schema::QueryRoot;
 
 #[Object]
 impl QueryRoot {

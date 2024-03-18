@@ -9,7 +9,7 @@ use axum::{
     Router,
 };
 use dotenv::dotenv;
-use schema::query_root::QueryRoot;
+use schema::QueryRoot;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use std::env;
 use tokio::net::TcpListener;
