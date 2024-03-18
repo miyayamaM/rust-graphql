@@ -9,23 +9,12 @@ use axum::{
     Router,
 };
 use dotenv::dotenv;
+use schema::query_root::QueryRoot;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use std::env;
 use tokio::net::TcpListener;
 
-struct Query;
-
-#[Object]
-impl Query {
-    async fn total_photos<'ctx>(&self, ctx: &Context<'ctx>) -> i64 {
-        let connection = &mut ctx.data_unchecked::<Pool<Postgres>>();
-        let counts = sqlx::query!("SELECT COUNT(*) as count FROM photos")
-            .fetch_one(*connection)
-            .await
-            .unwrap();
-        counts.count.unwrap()
-    }
-}
+mod schema;
 
 async fn graphql_playground() -> impl IntoResponse {
     Html(playground_source(GraphQLPlaygroundConfig::new("/")))
@@ -33,15 +22,9 @@ async fn graphql_playground() -> impl IntoResponse {
 
 #[tokio::main]
 async fn main() {
-    dotenv().ok();
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&database_url)
-        .await
-        .unwrap();
-    let schema = Schema::build(Query, EmptyMutation, EmptySubscription)
-        .data(pool.clone())
+    let pool = establish_db_connection().await;
+    let schema = Schema::build(QueryRoot, EmptyMutation, EmptySubscription)
+        .data(pool)
         .finish();
 
     // "/" でリクエストを待つ
@@ -54,4 +37,15 @@ async fn main() {
     axum::serve(TcpListener::bind("127.0.0.1:8000").await.unwrap(), app)
         .await
         .unwrap();
+}
+
+async fn establish_db_connection() -> Pool<Postgres> {
+    dotenv().ok();
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .unwrap()
 }
