@@ -12,9 +12,8 @@ impl AllPhotosQuery {
         let connection = &mut ctx.data_unchecked::<Pool<Postgres>>();
         sqlx::query_as(
             r#"
-        SELECT photos.id, photos.name, url, description, users.id as user_id, users.name as user_name, email, country
+        SELECT id, name, url, description
         FROM photos
-        JOIN users on photos.posted_by_user_id = users.id
         "#,
         )
         .fetch_all(*connection)
