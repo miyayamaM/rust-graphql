@@ -14,6 +14,7 @@ use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use std::env;
 use tokio::net::TcpListener;
 
+mod entities;
 mod schema;
 
 async fn graphql_playground() -> impl IntoResponse {
