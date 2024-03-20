@@ -1,7 +1,7 @@
 use async_graphql::{ComplexObject, Context, SimpleObject};
 use sqlx::{Pool, Postgres};
 
-use super::photo::Photo;
+use super::{country::Country, photo::Photo};
 
 #[derive(SimpleObject, sqlx::FromRow)]
 #[graphql(complex)]
@@ -9,7 +9,7 @@ pub struct User {
     id: i32,
     name: String,
     email: String,
-    country: String,
+    country: Country,
 }
 
 #[ComplexObject]
