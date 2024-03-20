@@ -6,10 +6,10 @@ use super::user::User;
 #[derive(SimpleObject, sqlx::FromRow)]
 #[graphql(complex)]
 pub struct Photo {
-    id: i32,
-    name: String,
-    url: String,
-    description: String,
+    pub id: i32,
+    pub name: String,
+    pub url: String,
+    pub description: String,
 }
 
 #[ComplexObject]

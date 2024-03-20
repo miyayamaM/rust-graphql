@@ -9,7 +9,7 @@ use axum::{
     Router,
 };
 use dotenv::dotenv;
-use schema::QueryRoot;
+use schema::{MutationRoot, QueryRoot};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use std::env;
 use tokio::net::TcpListener;
@@ -24,9 +24,13 @@ async fn graphql_playground() -> impl IntoResponse {
 #[tokio::main]
 async fn main() {
     let pool = establish_db_connection().await;
-    let schema = Schema::build(QueryRoot::default(), EmptyMutation, EmptySubscription)
-        .data(pool)
-        .finish();
+    let schema = Schema::build(
+        QueryRoot::default(),
+        MutationRoot::default(),
+        EmptySubscription,
+    )
+    .data(pool)
+    .finish();
 
     // "/" でリクエストを待つ
     let app = Router::new().route(

@@ -716,6 +716,7 @@ dependencies = [
  "async-graphql-axum",
  "axum",
  "dotenv",
+ "rand",
  "sqlx",
  "tokio",
 ]
