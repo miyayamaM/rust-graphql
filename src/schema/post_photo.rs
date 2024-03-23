@@ -8,7 +8,7 @@ pub struct PostPhotoMutation;
 
 #[Object]
 impl PostPhotoMutation {
-    #[tracing::instrument(skip(self, ctx), fields(request_name=%name, request_description=%description))]
+    #[tracing::instrument(skip(self, ctx))]
     async fn post_photo<'ctx>(
         &self,
         ctx: &Context<'ctx>,
