@@ -1,4 +1,5 @@
 use async_graphql::{
+    extensions::Tracing,
     http::{playground_source, GraphQLPlaygroundConfig},
     *,
 };
@@ -13,6 +14,7 @@ use schema::{MutationRoot, QueryRoot};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use std::env;
 use tokio::net::TcpListener;
+use tracing_subscriber::prelude::*;
 
 mod entities;
 mod schema;
@@ -23,12 +25,20 @@ async fn graphql_playground() -> impl IntoResponse {
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "debug".into()),
+        )
+        .with(tracing_subscriber::fmt::layer().json())
+        .init();
     let pool = establish_db_connection().await;
     let schema = Schema::build(
         QueryRoot::default(),
         MutationRoot::default(),
         EmptySubscription,
     )
+    .extension(Tracing)
     .data(pool)
     .finish();
 
