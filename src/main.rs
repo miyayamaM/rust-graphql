@@ -14,6 +14,7 @@ use schema::{MutationRoot, QueryRoot};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use std::env;
 use tokio::net::TcpListener;
+use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tracing_subscriber::prelude::*;
 
 mod entities;
@@ -43,10 +44,14 @@ async fn main() {
     .finish();
 
     // "/" でリクエストを待つ
-    let app = Router::new().route(
-        "/",
-        get(graphql_playground).post_service(GraphQL::new(schema)),
-    );
+    let app = Router::new()
+        .route(
+            "/",
+            get(graphql_playground).post_service(GraphQL::new(schema)),
+        )
+        .layer(
+            TraceLayer::new_for_http().make_span_with(DefaultMakeSpan::new().include_headers(true)),
+        );
 
     // server を起動
     axum::serve(TcpListener::bind("127.0.0.1:8000").await.unwrap(), app)
