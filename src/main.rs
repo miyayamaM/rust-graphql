@@ -1,15 +1,8 @@
-use async_graphql::{
-    extensions::Tracing,
-    http::{playground_source, GraphQLPlaygroundConfig},
-    *,
-};
-use async_graphql_axum::GraphQL;
-use axum::{
-    response::{Html, IntoResponse},
-    routing::get,
-    Router,
-};
+use crate::graphql::graphql_handler::graphql;
+use async_graphql::*;
+use axum::{routing::get, Router};
 use dotenv::dotenv;
+use graphql::graphql_handler::graphql_playground;
 use schema::{MutationRoot, QueryRoot};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use std::env;
@@ -18,11 +11,8 @@ use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tracing_subscriber::prelude::*;
 
 mod entities;
+mod graphql;
 mod schema;
-
-async fn graphql_playground() -> impl IntoResponse {
-    Html(playground_source(GraphQLPlaygroundConfig::new("/")))
-}
 
 #[tokio::main]
 async fn main() {
@@ -39,19 +29,17 @@ async fn main() {
         MutationRoot::default(),
         EmptySubscription,
     )
-    .extension(Tracing)
     .data(pool)
     .finish();
+    let state = AppState { schema };
 
     // "/" でリクエストを待つ
     let app = Router::new()
-        .route(
-            "/",
-            get(graphql_playground).post_service(GraphQL::new(schema)),
-        )
+        .route("/graphql", get(graphql_playground).post(graphql))
         .layer(
             TraceLayer::new_for_http().make_span_with(DefaultMakeSpan::new().include_headers(true)),
-        );
+        )
+        .with_state(state);
 
     // server を起動
     axum::serve(TcpListener::bind("127.0.0.1:8000").await.unwrap(), app)
@@ -68,4 +56,9 @@ async fn establish_db_connection() -> Pool<Postgres> {
         .connect(&database_url)
         .await
         .unwrap()
+}
+
+#[derive(Clone)]
+struct AppState {
+    schema: Schema<QueryRoot, MutationRoot, EmptySubscription>,
 }
