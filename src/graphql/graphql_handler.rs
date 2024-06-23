@@ -15,7 +15,7 @@ use crate::{
     AppState,
 };
 
-pub async fn graphql(
+pub async fn graphql_handler(
     State(state): State<Arc<AppState>>,
     request: GraphQLRequest,
 ) -> GraphQLResponse {
@@ -30,5 +30,5 @@ pub async fn graphql(
 }
 
 pub async fn graphql_playground() -> impl IntoResponse {
-    Html(playground_source(GraphQLPlaygroundConfig::new("/")))
+    Html(playground_source(GraphQLPlaygroundConfig::new("/graphql")))
 }

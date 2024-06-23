@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
-use crate::graphql::graphql_handler::graphql;
+use crate::graphql::graphql_handler::{graphql_handler, graphql_playground};
 use axum::{routing::get, Router};
 use database::connection::establish_db_connection;
-use graphql::graphql_handler::graphql_playground;
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
@@ -26,9 +25,8 @@ async fn main() {
 
     let state = Arc::new(AppState { pool });
 
-    // "/" でリクエストを待つ
     let app = Router::new()
-        .route("/graphql", get(graphql_playground).post(graphql))
+        .route("/graphql", get(graphql_playground).post(graphql_handler))
         .layer(
             TraceLayer::new_for_http().make_span_with(DefaultMakeSpan::new().include_headers(true)),
         )
